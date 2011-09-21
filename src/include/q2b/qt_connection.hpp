@@ -18,6 +18,7 @@ public:
 		connected_(false),
 		slot_idx_(slot_idx)
 	{
+		// TODO replace slow boost::lexical_cast ..
 		id_ = boost::lexical_cast<std::string>(this);
 		name_ = id_;
 	}

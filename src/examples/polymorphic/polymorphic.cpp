@@ -52,7 +52,7 @@ public :
 	~recv_clazz() { delete conn_; conn_ = NULL; }
 
 	void set_qsource(qt_emit_source_clazz * q) {
-		conn_ = bind_qt_signal<void(abstract_clazz *), qt_connection>(
+		conn_ = bind_qt_signal<void(abstract_clazz *)>(
 				q, SIGNAL(do_some(abstract_clazz *)), boost::bind(&recv_clazz::recv, this, _1));
 	}
 	

@@ -36,13 +36,13 @@ signals:
 class C {
 public:
 	explicit C(Q * q) : m_Q(q) {
-		conn = bind_qt_signal<void(), qt_connection>(q, SIGNAL(m1Done()), 
+		conn = bind_qt_signal<void()>(q, SIGNAL(m1Done()), 
 					boost::bind(&C::onM1Done, this));
 
-		conn1 = bind_qt_signal<void(int), qt_connection>(q, SIGNAL(m1Failed(int)),
+		conn1 = bind_qt_signal<void(int)>(q, SIGNAL(m1Failed(int)),
 					boost::bind(&C::onM1Failed, this, _1));
 
-		conn2 = bind_qt_signal<void(int, int), qt_connection>(q, SIGNAL(P2(int,int)), 
+		conn2 = bind_qt_signal<void(int, int)>(q, SIGNAL(P2(int,int)), 
 					boost::bind(&C::onP2, this , _1 , _2));
 		
 		// Failed as expected!!!
