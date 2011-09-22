@@ -11,182 +11,115 @@
 // You should have received a copy of the GNU General Public License
 // along with q2b.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef META_QT_BIND_HPP
-#define META_QT_BIND_HPP
+#ifndef META_QT_BIND_HPP_INCLUDED
+#define META_QT_BIND_HPP_INCLUDED
 
-#include <boost/function.hpp>
+#include <QObject>
+
 #include <boost/type_traits.hpp>
 
-#include "qt_connection.hpp"
+#include "meta_qt_slot.hpp"
 
-template<class T>
-class meta_qt_slot;
+namespace q2b_private {
 
-template<class R>
-class meta_qt_slot< R() > {
-public :
-	typedef boost::function0<R> function_type;
-	
-	inline explicit meta_qt_slot(function_type const & func) : func_(func) { }
-
-	inline void call(QObject * /*sender*/, void ** /*args*/ ) {
-		func_(); 
-	}
-
-private :
-	function_type func_;
-
+struct qt_connection_info {
+	int signal_idx;
+	int slot_idx;
+	bool connected;
+	QObject * sender;
 };
 
-template<class R, class P1>
-class meta_qt_slot< R(P1) > {
-public :
-	typedef boost::function1<R, P1> function_type;
-	typedef typename function_type::arg1_type arg1_type;
- 
-	inline explicit meta_qt_slot(function_type const & func) : func_(func) { }
-	
-	inline void call(QObject * /*sender*/, void ** args) {
-		arg1_type * a1 = static_cast<arg1_type*>(args[1]);
-		func_(*a1);
+inline bool is_qt_signal_type(char const * signal) {
+	return ((signal[0] - '0') & 0x03) == QSIGNAL_CODE ? true : false;
+}
+
+template <class Sig>
+int get_established_connection(QObject * sender, char const * signal) {
+	QByteArray norm_sig = QMetaObject::normalizedSignature(signal + 1);
+
+	if (!is_qt_signal_type(signal)) {
+		DEBUG_WARNING("ill connecting %s ; not a signal",  norm_sig.constData())
+		return -1;
 	}
-
-private : 
-	function_type func_;
-
-};
-
-template<class R, class P1, class P2>
-class meta_qt_slot< R(P1, P2) > {
-public :
-	typedef boost::function2<R, P1, P2> function_type;
-	typedef typename function_type::arg1_type arg1_type;
- 	typedef typename function_type::arg2_type arg2_type;
-
-	explicit meta_qt_slot(function_type const & func) : func_(func) { }
 	
-	inline void call(QObject * /*sender*/, void ** args) {
-		arg1_type * a1 = static_cast<arg1_type*>(args[1]);
-		arg2_type * a2 = static_cast<arg2_type*>(args[2]);
-		func_(*a1, *a2);
-	}
-
-private :
-	function_type func_;
-
-};
-
-template<class R, class P1, class P2, class P3>
-class meta_qt_slot< R(P1, P2, P3) > {
-public :
-	typedef boost::function3<R, P1, P2, P3> function_type;
-	typedef typename function_type::arg1_type arg1_type;
- 	typedef typename function_type::arg2_type arg2_type;
-	typedef typename function_type::arg3_type arg3_type;
-	
-	explicit meta_qt_slot(function_type const & func) : func_(func) { }
-	
-	inline void call(QObject * /*sender*/, void ** args) {
-		arg1_type * a1 = static_cast<arg1_type*>(args[1]);
-		arg2_type * a2 = static_cast<arg2_type*>(args[2]);
-		arg3_type * a3 = static_cast<arg3_type*>(args[3]);
-		func_(*a1, *a2, *a3);
-	}
-
-private :
-	function_type func_;
-
-};
-
-template<class R, class P1, class P2, class P3, class P4>
-class meta_qt_slot< R(P1, P2, P3, P4) > {
-public :
-	typedef boost::function4<R, P1, P2, P3, P4> function_type;
-	typedef typename function_type::arg1_type arg1_type;
- 	typedef typename function_type::arg2_type arg2_type;
-	typedef typename function_type::arg3_type arg3_type;
-	typedef typename function_type::arg4_type arg4_type;
-
-	explicit meta_qt_slot(function_type const & func) : func_(func) { }
-	
-	inline void call(QObject * /*sender*/, void ** args) {
-		arg1_type * a1 = static_cast<arg1_type*>(args[1]);
-		arg2_type * a2 = static_cast<arg2_type*>(args[2]);
-		arg3_type * a3 = static_cast<arg3_type*>(args[3]);
-		arg4_type * a4 = static_cast<arg4_type*>(args[4]);
-		func_(*a1, *a2, *a3, *a4);
-	}
-
-private :
-	function_type func_;
-
-};
-
-template<class R, class P1, class P2, class P3, class P4, class P5>
-class meta_qt_slot< R(P1, P2, P3, P4, P5) > {
-public :
-	typedef boost::function5<R, P1, P2, P3, P4, P5> function_type;
-	typedef typename function_type::arg1_type arg1_type;
- 	typedef typename function_type::arg2_type arg2_type;
-	typedef typename function_type::arg3_type arg3_type;
-	typedef typename function_type::arg4_type arg4_type;
-	typedef typename function_type::arg5_type arg5_type;
-	
-	explicit meta_qt_slot(function_type const & func) : func_(func) { }
-	
-	inline void call(QObject * /*sender*/, void ** args) {
-		arg1_type * a1 = static_cast<arg1_type*>(args[1]);
-		arg2_type * a2 = static_cast<arg2_type*>(args[2]);
-		arg3_type * a3 = static_cast<arg3_type*>(args[3]);
-		arg4_type * a4 = static_cast<arg4_type*>(args[4]);
-		arg5_type * a5 = static_cast<arg5_type*>(args[5]);
-		func_(*a1, *a2, *a3, *a4, *a5);
-	}
-
-private :
-	function_type func_;
-
-};
-
-template<class Sig, class ConnectorInfo>
-class meta_qt_bind : public QObject, public ConnectorInfo {
-public:
-	typedef ConnectorInfo connector_info_type;
-	typedef boost::function<Sig> function_type;
-	
-	meta_qt_bind(QObject* qobject, int signal_idx, function_type const & func) :
-		QObject(qobject), 
-		connector_info_type(qobject, signal_idx, metaObject()->methodCount()), 
-		slot_(func)
-	{
-		connect();
-	}
-
-	inline int qt_metacall(QMetaObject::Call callable, int call_id, void ** args) {
-		call_id = QObject::qt_metacall(callable, call_id, args);
-		if (call_id < 0 || callable != QMetaObject::InvokeMetaMethod)
-			return call_id;
-		slot_.call(NULL, args);
+	QMetaObject const * meta_obj = sender->metaObject();
+	int const signal_id = meta_obj->indexOfSignal(norm_sig.constData());
+	if (signal_id < 0) {
+		DEBUG_WARNING("ill connecting %s ; signal does not exist on object %s", 
+			norm_sig.constData(), sender->objectName().toStdString().data());
 		return -1;
 	}
 
-	virtual void connect() {
-		bool const state = 
-			QMetaObject::connect(this->q_meta(), 
-				this->get_signal_idx(), this, this->get_slot_idx());
-		this->set_connect_state(state);
+#if defined (Q2B_STRONG_CHECK) 
+	QMetaMethod meta_method = meta_obj->method(signal_id);
+	int const att_size = int(boost::function_traits<Sig>::arity);
+	if  (att_size != meta_method.parameterNames().size()) {
+		DEBUG_WARNING("ill connecting %s ; of arguments do not match", 
+							norm_sig.constData())
+		return -1;
+	}
+#endif
+
+	return signal_id;
+}
+
+}
+
+template<class Sig>
+class meta_qt_bind : public QObject {
+public:
+	typedef boost::function<Sig> function_type;
+
+	inline meta_qt_bind(QObject * sender, int signal_idx, function_type const & func) :
+		slot_(func), conn_info_()
+	{
+		conn_info_.signal_idx = signal_idx;
+		conn_info_.slot_idx = metaObject()->methodCount();
+		conn_info_.sender = sender;
+		conn_info_.connected = QMetaObject::connect(
+							sender, conn_info_.signal_idx, this, conn_info_.slot_idx);
 	}
 
-	virtual void disconnect() {
-		bool const state =
-			!QMetaObject::disconnect(this->q_meta(), 
-					this->get_signal_idx(), this, this->get_slot_idx());
-		this->set_connect_state(state);
+#if defined (Q2B_STRONG_CHECK)
+	virtual int qt_metacall(QMetaObject::Call callable, int call_id, void ** args) {
+		call_id = QObject::qt_metacall(callable, call_id, args);
+		if (call_id < 0 || callable != QMetaObject::InvokeMetaMethod)
+			return call_id;
+		slot_.call(args);
+		return -1;
+	}
+#elif
+	virtual int qt_metacall(QMetaObject::Call, int, void ** args) {
+		slot_.call(args);
+		return -1;
+	}
+
+#endif
+	inline bool connect() {
+		if (!conn_info_.connected)
+			return (conn_info_.connected = QMetaObject::connect(conn_info_.sender, 
+								conn_info_.signal_idx, this, conn_info_.slot_idx));
+		return false;
+	}
+
+	inline bool disconnect() {
+		if (conn_info_.connected)
+			return (conn_info_.connected = !QMetaObject::disconnect(conn_info_.sender, 
+					conn_info_.signal_idx, this, conn_info_.slot_idx));
+		return false;
+	}
+	
+	inline bool is_connected() const { 
+		return conn_info_.connected; 
+	} 
+
+	~meta_qt_bind() { 
+		disconnect();
 	}
 
 private :
-	function_type func_;
-	meta_qt_slot<Sig> slot_;
+	q2b_private::meta_qt_slot<Sig> slot_;
+	q2b_private::qt_connection_info conn_info_;	
 
 };
 

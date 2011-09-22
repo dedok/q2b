@@ -2,7 +2,7 @@ QT -= gui
 TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
-INCLUDEPATH += ../../include /opt/local/include
+INCLUDEPATH += ../../include 
 LIBS += 
 
 CXXFLAGS += -Wall -pedantic -O2 -DDEBUG 
