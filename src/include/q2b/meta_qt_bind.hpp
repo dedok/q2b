@@ -14,13 +14,8 @@
 #ifndef META_QT_BIND_HPP
 #define META_QT_BIND_HPP
 
+#include <boost/function.hpp>
 #include <boost/type_traits.hpp>
-#include <boost/function/function0.hpp>
-#include <boost/function/function1.hpp>
-#include <boost/function/function2.hpp>
-#include <boost/function/function3.hpp>
-#include <boost/function/function4.hpp>
-#include <boost/function/function5.hpp>
 
 #include "qt_connection.hpp"
 
@@ -32,10 +27,10 @@ class meta_qt_slot< R() > {
 public :
 	typedef boost::function0<R> function_type;
 	
-	explicit meta_qt_slot(function_type const & func) : func_(func) { }
+	inline explicit meta_qt_slot(function_type const & func) : func_(func) { }
 
 	inline void call(QObject * /*sender*/, void ** /*args*/ ) {
-		if (func_) func_(); 
+		func_(); 
 	}
 
 private :
@@ -49,11 +44,11 @@ public :
 	typedef boost::function1<R, P1> function_type;
 	typedef typename function_type::arg1_type arg1_type;
  
-	explicit meta_qt_slot(function_type const & func) : func_(func) { }
+	inline explicit meta_qt_slot(function_type const & func) : func_(func) { }
 	
 	inline void call(QObject * /*sender*/, void ** args) {
 		arg1_type * a1 = static_cast<arg1_type*>(args[1]);
-		if (func_) func_(*a1);
+		func_(*a1);
 	}
 
 private : 
@@ -73,7 +68,7 @@ public :
 	inline void call(QObject * /*sender*/, void ** args) {
 		arg1_type * a1 = static_cast<arg1_type*>(args[1]);
 		arg2_type * a2 = static_cast<arg2_type*>(args[2]);
-		if (func_) func_(*a1, *a2);
+		func_(*a1, *a2);
 	}
 
 private :
@@ -95,7 +90,7 @@ public :
 		arg1_type * a1 = static_cast<arg1_type*>(args[1]);
 		arg2_type * a2 = static_cast<arg2_type*>(args[2]);
 		arg3_type * a3 = static_cast<arg3_type*>(args[3]);
-		if (func_) func_(*a1, *a2, *a3);
+		func_(*a1, *a2, *a3);
 	}
 
 private :
@@ -119,7 +114,7 @@ public :
 		arg2_type * a2 = static_cast<arg2_type*>(args[2]);
 		arg3_type * a3 = static_cast<arg3_type*>(args[3]);
 		arg4_type * a4 = static_cast<arg4_type*>(args[4]);
-		if (func_) func_(*a1, *a2, *a3, *a4);
+		func_(*a1, *a2, *a3, *a4);
 	}
 
 private :
@@ -144,8 +139,8 @@ public :
 		arg2_type * a2 = static_cast<arg2_type*>(args[2]);
 		arg3_type * a3 = static_cast<arg3_type*>(args[3]);
 		arg4_type * a4 = static_cast<arg4_type*>(args[4]);
-		arg5_type * a5 = static_cast<arg4_type*>(args[5]);
-		if (func_) func_(*a1, *a2, *a3, *a4, *a5);
+		arg5_type * a5 = static_cast<arg5_type*>(args[5]);
+		func_(*a1, *a2, *a3, *a4, *a5);
 	}
 
 private :
@@ -153,31 +148,25 @@ private :
 
 };
 
-template<class SIG, class ConnectorInfo>
+template<class Sig, class ConnectorInfo>
 class meta_qt_bind : public QObject, public ConnectorInfo {
 public:
 	typedef ConnectorInfo connector_info_type;
-	typedef boost::function<SIG> function_type;
+	typedef boost::function<Sig> function_type;
 	
 	meta_qt_bind(QObject* qobject, int signal_idx, function_type const & func) :
 		QObject(qobject), 
 		connector_info_type(qobject, signal_idx, metaObject()->methodCount()), 
-		func_(func),
-		slot_(NULL)
+		slot_(func)
 	{
-		slot_ = new meta_qt_slot<SIG>(func);
 		connect();
 	}
 
-	~meta_qt_bind() {
-		delete slot_; slot_ = NULL;
-	}
-
-	inline int qt_metacall(QMetaObject::Call call_able, int call_id, void ** args) {
-		call_id = QObject::qt_metacall(call_able, call_id, args);
-		if ( call_id < 0 || call_able != QMetaObject::InvokeMetaMethod )
+	inline int qt_metacall(QMetaObject::Call callable, int call_id, void ** args) {
+		call_id = QObject::qt_metacall(callable, call_id, args);
+		if (call_id < 0 || callable != QMetaObject::InvokeMetaMethod)
 			return call_id;
-		slot_->call(sender(), args);
+		slot_.call(NULL, args);
 		return -1;
 	}
 
@@ -197,7 +186,7 @@ public:
 
 private :
 	function_type func_;
-	meta_qt_slot<SIG> * slot_;
+	meta_qt_slot<Sig> slot_;
 
 };
 

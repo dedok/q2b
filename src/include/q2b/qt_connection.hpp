@@ -13,33 +13,22 @@
 
 #ifndef QT_CONNECTION_HPP_INCLUDED
 #define QT_CONNECTION_HPP_INCLUDED
-
-#include <boost/lexical_cast.hpp>
-
-#include "abstract_qt_connection.hpp" 
-
+ 
 class QObject;
 
-class qt_connection : public abstract_qt_connection {
+class qt_connection {
 public:
-	 qt_connection(QObject* qobject, int signal_idx, int slot_idx) :
-		abstract_qt_connection(),
+	 qt_connection(QObject * qobject, int signal_idx, int slot_idx) :
 		qobject_(qobject), 
 		signal_idx_(signal_idx), 
-		name_(),
-		id_(),
 		connected_(false),
 		slot_idx_(slot_idx)
-	{
-		// TODO replace slow boost::lexical_cast ..
-		id_ = boost::lexical_cast<std::string>(this);
-		name_ = id_;
-	}
+	{ }
 
-	virtual void set_name(const std::string& name) { name_ = name; }
-	virtual std::string get_name() const { return name_; }
+	virtual void set_name(const std::string & ) { }
+	virtual std::string get_name() const { return std::string(0); }
 
-	virtual std::string get_id() const { return id_; }
+	virtual std::string get_id() const { return std::string(0); }
 
 	virtual int get_slot_idx() const { return slot_idx_; }
 	virtual int get_signal_idx() const { return signal_idx_; }
@@ -54,9 +43,6 @@ protected :
 private :
 	QObject * qobject_;
 	int signal_idx_;
-
-	std::string name_;
-	std::string id_;
 
 	bool connected_;
 	int slot_idx_;
