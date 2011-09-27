@@ -88,13 +88,14 @@ public:
 		slot_.call(args);
 		return -1;
 	}
-#elif
+#else
 	virtual int qt_metacall(QMetaObject::Call, int, void ** args) {
 		slot_.call(args);
 		return -1;
 	}
 
 #endif
+
 	inline bool connect() {
 		if (!conn_info_.connected)
 			return (conn_info_.connected = QMetaObject::connect(conn_info_.sender, 

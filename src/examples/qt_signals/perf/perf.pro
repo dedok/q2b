@@ -2,7 +2,7 @@ QT -= gui
 TEMPLATE = app
 TARGET = 
 DEPENDPATH += .
-INCLUDEPATH += . ../../include
+INCLUDEPATH += . ../../../include
 LIBS += 
 CONFIG += release
 

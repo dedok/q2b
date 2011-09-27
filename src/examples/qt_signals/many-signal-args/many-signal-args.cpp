@@ -3,7 +3,7 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 
-#include <q2b/bind_qt_signal.hpp>
+#include <q2b/qt_signals.hpp>
 #include <boost/bind.hpp>
 
 class Q : public QObject {
@@ -36,13 +36,13 @@ signals:
 class C {
 public:
 	explicit C(Q * q) : m_Q(q) {
-		conn = bind_qt_signal<void()>(q, SIGNAL(m1Done()), 
+		bind_qt_signal<void()>(q, SIGNAL(m1Done()), 
 					boost::bind(&C::onM1Done, this));
 
-		conn1 = bind_qt_signal<void(int)>(q, SIGNAL(m1Failed(int)),
+		bind_qt_signal<void(int)>(q, SIGNAL(m1Failed(int)),
 					boost::bind(&C::onM1Failed, this, _1));
 
-		conn2 = bind_qt_signal<void(int, int)>(q, SIGNAL(P2(int,int)), 
+		bind_qt_signal<void(int, int)>(q, SIGNAL(P2(int,int)), 
 					boost::bind(&C::onP2, this , _1 , _2));
 		
 		// Failed as expected!!!
@@ -72,17 +72,8 @@ public:
 	
 	void failFunc(int,int,int,int,int,int,int,int,int) { }
 
-	~C() {
-		delete conn; delete conn1; delete conn2;
-	}
-
 private:
 	Q * m_Q;
-
-	qt_connection * conn;
-	qt_connection * conn1;
-	qt_connection * conn2;
-
 };
 
 int main(int argc, char *argv[]) {

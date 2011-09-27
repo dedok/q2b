@@ -5,7 +5,7 @@
 #include <QMetaObject>
 #include <QMetaMethod>
 
-#include <q2b/bind_qt_signal.hpp>
+#include <q2b/qt_signals.hpp>
 #include <boost/bind.hpp>
 
 static size_t abstract_clazz_dtor_called = 0;
@@ -48,11 +48,8 @@ signals :
 
 class recv_clazz {
 public :
-	recv_clazz() : conn_(NULL) { }
-	~recv_clazz() { delete conn_; conn_ = NULL; }
-
 	void set_qsource(qt_emit_source_clazz * q) {
-		conn_ = bind_qt_signal<void(abstract_clazz *)>(
+		bind_qt_signal<void(abstract_clazz *)>(
 				q, SIGNAL(do_some(abstract_clazz *)), boost::bind(&recv_clazz::recv, this, _1));
 	}
 	
@@ -63,7 +60,6 @@ private :
 		delete v; v = NULL;
 	}
 
-	qt_connection * conn_;
 };
 
 int main(int ac, char ** av) {

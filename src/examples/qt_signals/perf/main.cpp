@@ -4,7 +4,7 @@
 #include <QtDebug>
 
 #include <QMetaMethod>
-#include <q2b/bind_qt_signal.hpp>
+#include <q2b/qt_signals.hpp>
 #include <boost/bind.hpp>
 
 const quint64 c_N = 10000000;
